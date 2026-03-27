@@ -1,0 +1,38 @@
+import telebot
+import pandas as pd
+import os
+
+TOKEN = os.getenv("BOT_TOKEN")
+bot = telebot.TeleBot(TOKEN)
+
+file_path = "your_excel.xlsx"
+df = pd.read_excel(file_path)
+
+@bot.message_handler(func=lambda message: True)
+def check_pinfl(message):
+    pinfl = message.text.strip()
+
+    try:
+        result = df[df.iloc[:, 4].astype(str) == pinfl]
+
+        if not result.empty:
+            row = result.iloc[0]
+
+            javob = f"""
+📄 Ma'lumot topildi:
+
+👤 {row.iloc[1]}
+📍 {row.iloc[2]}
+📊 {row.iloc[5]}
+📊 {row.iloc[6]}
+📊 {row.iloc[7]}
+💰 {row.iloc[14]}
+"""
+            bot.reply_to(message, javob)
+        else:
+            bot.reply_to(message, "❌ Siz ro'yxatda yo'qsiz")
+
+    except:
+        bot.reply_to(message, "⚠️ Xatolik yuz berdi")
+
+bot.polling(none_stop=True)
